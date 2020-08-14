@@ -1,0 +1,38 @@
+CREATE TABLE public.vendors (
+    id SERIAL PRIMARY KEY,
+    uuid VARCHAR(50) NOT NULL,
+    name VARCHAR (255) NOT NULL,
+    address VARCHAR(400),
+    email VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE public.users (
+    id SERIAL PRIMARY KEY,
+    uuid VARCHAR(50) NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    address VARCHAR(400),
+    email VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role INTEGER NOT NULL,
+    id_vendor INTEGER DEFAULT 0 REFERENCES vendors ON UPDATE CASCADE ON DELETE SET DEFAULT
+);
+
+CREATE TABLE public.orders (
+    id SERIAL PRIMARY KEY,
+    uuid VARCHAR(50) NOT NULL,
+    id_user INTEGER NOT NULL REFERENCES users ON UPDATE CASCADE ON DELETE RESTRICT,
+    id_vendor INTEGER NOT NULL REFERENCES vendors ON UPDATE CASCADE ON DELETE RESTRICT,
+    quantity INTEGER NOT NULL,
+    status INTEGER NOT NULL,
+    specification jsonb,
+    price REAL NOT NULL
+);
+
+CREATE TABLE public.materials (
+    id SERIAL PRIMARY KEY,
+    uuid VARCHAR(50) NOT NULL,
+    name VARCHAR(255),
+    cost REAL DEFAULT 0 NOT NULL,
+    detail VARCHAR(255),
+    color VARCHAR(100)
+);
