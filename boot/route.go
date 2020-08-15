@@ -20,6 +20,12 @@ func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 	api := r.Group("")
 	{
 
+		api.GET("/", func(c *gin.Context) {
+			c.JSON(200, gin.H{
+				"message": "go-jahitin",
+			})
+		})
+
 		session := api.Group("/session")
 		{
 			session.POST("/login", sessionHandler.Login)
