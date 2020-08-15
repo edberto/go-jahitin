@@ -12,6 +12,7 @@ import (
 type (
 	IOrder interface {
 		GetAll(param GetAllOrderParam) ([]entity.OrderEntity, error)
+		GetOne(param GetOneOrderParam) (entity.OrderEntity, error)
 		InsertOne(param InsertOneOrderParam) (entity.OrderEntity, error)
 		UpdateStatusOne(param UpdateStatusOneOrderParam) (entity.OrderEntity, error)
 	}
@@ -25,6 +26,10 @@ type (
 		UserIDs   []int
 		TailorIDs []int
 		Status    []int
+	}
+
+	GetOneOrderParam struct {
+		ID int
 	}
 
 	InsertOneOrderParam struct {
@@ -88,6 +93,30 @@ func (model *Order) GetAll(param GetAllOrderParam) ([]entity.OrderEntity, error)
 
 		*res = append(*res, *t)
 	}
+
+	return *res, err
+}
+
+func (model *Order) GetOne(param GetOneOrderParam) (entity.OrderEntity, error) {
+	res := new(entity.OrderEntity)
+
+	selectQ := `
+	SELECT id, uuid, user_id, tailor_id, status, price, specification, user_address, created_at, updated_at
+	FROM orders
+	`
+
+	whereQ := `WHERE deleted_at IS NULL`
+	whereP := []interface{}{}
+	if p := param.ID; p != 0 {
+		whereQ += ` AND id = ?`
+		whereP = append(whereP, p)
+	}
+
+	limitQ := ` ORDER BY updated_at LIMIT 1`
+
+	q := helper.ReplacePlaceholder(fmt.Sprintf("%s%s%s", selectQ, whereQ, limitQ), 1)
+
+	err := model.Toolkit.DB.QueryRow(q, whereP...).Scan(&res.ID, &res.UUID, &res.UserID, &res.TailorID, &res.Status, &res.Price, &res.Specification, &res.UserAddress, &res.CreatedAt, &res.UpdatedAt)
 
 	return *res, err
 }

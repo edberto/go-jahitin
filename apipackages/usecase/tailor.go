@@ -26,6 +26,7 @@ type (
 		MaterialIDs []int
 		ModelIDs    []int
 		Keyword     string
+		Price       float64
 	}
 )
 
@@ -101,6 +102,21 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 		if _, e := tailorMaterialMap[id]; !e {
 			ids[i] = ids[len(ids)-1]
 			ids = ids[:len(ids)-1]
+		}
+	}
+	if len(ids) == 0 {
+		return *new([]viewmodel.TailorVM), nil
+	}
+
+	if param.Price != 0 {
+		for i, id := range ids {
+			material := tailorMaterialMap[id]
+			mdl := tailorModelMap[id]
+
+			if (material.Price + mdl.Price) > param.Price {
+				ids[i] = ids[len(ids)-1]
+				ids = ids[:len(ids)-1]
+			}
 		}
 	}
 	if len(ids) == 0 {

@@ -12,6 +12,7 @@ import (
 type (
 	IModel interface {
 		GetAll(param GetAllModelParam) ([]entity.ModelEntity, error)
+		GetOne(param GetOneModelParam) (entity.ModelEntity, error)
 	}
 
 	Model struct {
@@ -20,6 +21,10 @@ type (
 
 	GetAllModelParam struct {
 		IDs []int
+	}
+
+	GetOneModelParam struct {
+		ID int
 	}
 )
 
@@ -34,7 +39,7 @@ func (model *Model) GetAll(param GetAllModelParam) ([]entity.ModelEntity, error)
 
 	selectQ := `
 		SELECT id, uuid, name, detail, created_at, updated_at
-		FROM materials
+		FROM models
 	`
 
 	whereQ := `WHERE deleted_at IS NULL`
@@ -61,6 +66,30 @@ func (model *Model) GetAll(param GetAllModelParam) ([]entity.ModelEntity, error)
 
 		*res = append(*res, *t)
 	}
+
+	return *res, err
+}
+
+func (model *Model) GetOne(param GetOneModelParam) (entity.ModelEntity, error) {
+	res := new(entity.ModelEntity)
+
+	selectQ := `
+		SELECT id, uuid, name, detail, created_at, updated_at
+		FROM models
+	`
+
+	whereQ := `WHERE deleted_at IS NULL`
+	whereP := []interface{}{}
+	if p := param.ID; p != 0 {
+		whereQ += ` AND id = ?`
+		whereP = append(whereP, p)
+	}
+
+	limitQ := ` ORDER BY updated_at DESC LIMIT 1`
+
+	q := helper.ReplacePlaceholder(fmt.Sprintf("%s%s%s", selectQ, whereQ, limitQ), 1)
+
+	err := model.Toolkit.DB.QueryRow(q, whereP...).Scan(&res.ID, &res.UUID, &res.Name, &res.Detail, &res.CreatedAt, &res.UpdatedAt)
 
 	return *res, err
 }

@@ -12,6 +12,7 @@ import (
 type (
 	ITailor interface {
 		GetAll(param GetAllTailorParam) ([]entity.TailorEntity, error)
+		GetOne(param GetOneTailorParam) (entity.TailorEntity, error)
 		InsertOne(param InsertOneTailorParam) (entity.TailorEntity, error)
 		UpdateOne(param UpdateOneTailorParam) (entity.TailorEntity, error)
 	}
@@ -23,6 +24,10 @@ type (
 	GetAllTailorParam struct {
 		IDs     []int
 		Keyword string
+	}
+
+	GetOneTailorParam struct {
+		ID int
 	}
 
 	InsertOneTailorParam struct {
@@ -80,6 +85,30 @@ func (model *Tailor) GetAll(param GetAllTailorParam) ([]entity.TailorEntity, err
 
 		*res = append(*res, *t)
 	}
+
+	return *res, err
+}
+
+func (model *Tailor) GetOne(param GetOneTailorParam) (entity.TailorEntity, error) {
+	res := new(entity.TailorEntity)
+
+	selectQ := `
+	SELECT id, uuid, name, address, email, phone, created_at, updated_at
+	FROM tailors
+`
+
+	whereQ := `WHERE deleted_at IS NULL`
+	whereP := []interface{}{}
+	if p := param.ID; p != 0 {
+		whereQ += ` AND id = ?`
+		whereP = append(whereP, p)
+	}
+
+	limitQ := ` ORDER BY updated_at DESC LIMIT 1`
+
+	q := helper.ReplacePlaceholder(fmt.Sprintf("%s%s%s", selectQ, whereQ, limitQ), 1)
+
+	err := model.Toolkit.DB.QueryRow(q, whereP...).Scan(&res.ID, &res.UUID, &res.Name, &res.Address, &res.Email, &res.Phone, &res.CreatedAt, &res.UpdatedAt)
 
 	return *res, err
 }

@@ -1,15 +1,17 @@
 package usecase
 
 import (
-	"fmt"
 	"go-jahitin/apipackages"
 	"go-jahitin/apipackages/entity"
 	"go-jahitin/apipackages/model"
 	"go-jahitin/apipackages/viewmodel"
+	"go-jahitin/helper/constants"
+	"go-jahitin/helper/uuid"
 )
 
 type (
 	IOrder interface {
+		FindDetail(order entity.OrderEntity) (viewmodel.OrderVM, error)
 		GetAll(param GetAllOrderParam) ([]viewmodel.OrderVM, error)
 		GetOne(param GetOneOrderParam) (viewmodel.OrderVM, error)
 		InsertOne(param InsertOneOrderParam) (viewmodel.OrderVM, error)
@@ -135,24 +137,125 @@ func (uc *Order) GetAll(param GetAllOrderParam) ([]viewmodel.OrderVM, error) {
 	}
 
 	for _, o := range orders {
-		t := viewmodel.OrderVM{}
-		fmt.Println(o, t)
+		user := userMap[o.UserID]
+		tailor := tailorMap[o.TailorID]
+		mdl := modelMap[o.Specification.ModelID]
+		material := materialMap[o.Specification.MaterialID]
+
+		t := viewmodel.OrderVM{
+			ID:          o.ID,
+			UserID:      user.ID,
+			TailorID:    tailor.ID,
+			UserName:    user.Name,
+			UserPhone:   user.Phone,
+			UserAddress: o.UserAddress.String,
+			TailorName:  tailor.Name.String,
+			TailorPhone: tailor.Phone.String,
+			Status:      constants.OrderStatusItoA[o.Status],
+			UUID:        o.UUID,
+			Specification: viewmodel.Specification{
+				MaterialID:     material.ID,
+				ModelID:        mdl.ID,
+				MaterialName:   material.Name,
+				MaterialColor:  material.Color,
+				MaterialDetail: material.Detail,
+				ModelName:      mdl.Name,
+				ModelDetail:    mdl.Detail,
+				Quantity:       (viewmodel.Quantity)(o.Specification.Qty),
+			},
+		}
+
+		*res = append(*res, t)
 	}
 
 	return *res, err
 }
 
 func (uc *Order) GetOne(param GetOneOrderParam) (viewmodel.OrderVM, error) {
-	res := new(viewmodel.OrderVM)
-	return *res, nil
+	order, err := uc.OrderModel.GetOne(model.GetOneOrderParam{
+		ID: param.ID,
+	})
+	if err != nil {
+		return *new(viewmodel.OrderVM), err
+	}
+
+	return uc.FindDetail(order)
 }
 
 func (uc *Order) InsertOne(param InsertOneOrderParam) (viewmodel.OrderVM, error) {
-	res := new(viewmodel.OrderVM)
-	return *res, nil
+	order, err := uc.OrderModel.InsertOne(model.InsertOneOrderParam{
+		UserID:        param.UserID,
+		TailorID:      param.TailorID,
+		Status:        param.Status,
+		Price:         param.Price,
+		UUID:          uuid.NewUUID(),
+		Specification: param.Specification,
+	})
+	if err != nil {
+		return *new(viewmodel.OrderVM), err
+	}
+
+	return uc.FindDetail(order)
 }
 
 func (uc *Order) UpdateStatusOne(param UpdateStatusOneOrderParam) (viewmodel.OrderVM, error) {
-	res := new(viewmodel.OrderVM)
-	return *res, nil
+	order, err := uc.OrderModel.UpdateStatusOne((model.UpdateStatusOneOrderParam)(param))
+	if err != nil {
+		return *new(viewmodel.OrderVM), err
+	}
+
+	return uc.FindDetail(order)
+}
+
+func (uc *Order) FindDetail(order entity.OrderEntity) (viewmodel.OrderVM, error) {
+	user, err := uc.UserModel.GetOne(model.GetOneUserParam{
+		ID: order.UserID,
+	})
+	if err != nil {
+		return *new(viewmodel.OrderVM), err
+	}
+
+	tailor, err := uc.TailorModel.GetOne(model.GetOneTailorParam{
+		ID: order.TailorID,
+	})
+	if err != nil {
+		return *new(viewmodel.OrderVM), err
+	}
+
+	mdl, err := uc.ModelModel.GetOne(model.GetOneModelParam{
+		ID: order.Specification.ModelID,
+	})
+	if err != nil {
+		return *new(viewmodel.OrderVM), err
+	}
+
+	material, err := uc.MaterialModel.GetOne(model.GetOneMaterialParam{
+		ID: order.Specification.MaterialID,
+	})
+	if err != nil {
+		return *new(viewmodel.OrderVM), err
+	}
+
+	return viewmodel.OrderVM{
+		ID:          order.ID,
+		UserID:      user.ID,
+		TailorID:    tailor.ID,
+		UserName:    user.Name,
+		UserPhone:   user.Phone,
+		UserAddress: order.UserAddress.String,
+		TailorName:  tailor.Name.String,
+		TailorPhone: tailor.Phone.String,
+		Status:      constants.OrderStatusItoA[order.Status],
+		UUID:        order.UUID,
+		Specification: viewmodel.Specification{
+			MaterialID:     material.ID,
+			ModelID:        mdl.ID,
+			MaterialName:   material.Name,
+			MaterialColor:  material.Color,
+			MaterialDetail: material.Detail,
+			ModelName:      mdl.Name,
+			ModelDetail:    mdl.Detail,
+			Quantity:       (viewmodel.Quantity)(order.Specification.Qty),
+		},
+	}, nil
 }
