@@ -49,3 +49,12 @@ CREATE TABLE public.materials (
     detail VARCHAR(255),
     color VARCHAR(100)
 );
+
+CREATE TABLE public.user_tokens (
+    uuid VARCHAR(50) NOT NULL PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
+    user_id INTEGER NOT NULL,
+    expired_at TIMESTAMPTZ NOT NULL
+)

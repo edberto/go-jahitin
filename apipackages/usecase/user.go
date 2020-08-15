@@ -33,7 +33,9 @@ type (
 		Password string
 		Role     string
 	}
-	GetOneUserParam struct{}
+	GetOneUserParam struct {
+		ID int
+	}
 )
 
 func NewUserUC(tk *apipackages.Toolkit) IUser {
@@ -50,6 +52,9 @@ func (uc *User) Register(param RegisterUserParam) (viewmodel.UserVM, error) {
 	})
 	if err != nil && err != sql.ErrNoRows {
 		return *new(viewmodel.UserVM), err
+	}
+	if user.ID != 0 {
+		return *new(viewmodel.UserVM), constants.ErrUsernameHasBeenUsed
 	}
 
 	pwd := []byte(param.Password)
@@ -100,5 +105,23 @@ func (uc *User) Register(param RegisterUserParam) (viewmodel.UserVM, error) {
 }
 
 func (uc *User) GetOne(param GetOneUserParam) (viewmodel.UserVM, error) {
-	return viewmodel.UserVM{}, nil
+	res := new(viewmodel.UserVM)
+
+	user, err := uc.UserModel.GetOne(model.GetOneUserParam{
+		ID: param.ID,
+	})
+	if err != nil {
+		return *res, err
+	}
+
+	return viewmodel.UserVM{
+		ID:       user.ID,
+		TailorID: int(user.TailorID.Int32),
+		Address:  user.Address,
+		Email:    user.Email,
+		Name:     user.Name,
+		Role:     constants.RoleItoA[user.Role],
+		Username: user.Username,
+		UUID:     user.UUID,
+	}, nil
 }

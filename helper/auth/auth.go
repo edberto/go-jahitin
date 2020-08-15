@@ -12,7 +12,7 @@ import (
 
 type (
 	IAuth interface {
-		AddClaim(key string, value interface{}) *Auth
+		SetClaim(key string, value interface{})
 		CreateToken() (token string, err error)
 		ExtractClaims(r *http.Request) (res map[string]interface{}, err error)
 		VerifyToken(tokenString string) (*jwt.Token, error)
@@ -20,7 +20,6 @@ type (
 	}
 
 	Auth struct {
-		IAuth
 		Key   string
 		Claim map[string]interface{}
 	}
@@ -32,16 +31,16 @@ type (
 	}
 )
 
-func NewAuth(key string) *Auth {
+func NewAuth(key string) IAuth {
 	claim := map[string]interface{}{}
 	return &Auth{Key: key, Claim: claim}
 }
 
-func (j *Auth) AddClaim(key string, value interface{}) *Auth {
+func (j *Auth) SetClaim(key string, value interface{}) {
 	claim := j.Claim
 	claim[key] = value
 	j.Claim = claim
-	return j
+	return
 }
 
 func (j *Auth) CreateToken() (token string, err error) {
@@ -82,7 +81,7 @@ func (j *Auth) VerifyToken(tokenString string) (*jwt.Token, error) {
 func (j *Auth) GetUserToken(db *sql.DB, uuid string) (UserTokenEntity, error) {
 	res := new(UserTokenEntity)
 
-	q := `SELECT user_id, access_uuid, expired_at FROM user_tokens WHERE uuid = $1`
+	q := `SELECT user_id, uuid, expired_at FROM user_tokens WHERE uuid = $1`
 
 	err := db.QueryRow(q, uuid).Scan(&res.UserID, &res.AccessUUID, &res.ExpiredAt)
 

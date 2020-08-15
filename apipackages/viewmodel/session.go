@@ -1,7 +1,11 @@
 package viewmodel
 
 type (
-	LoginVM   struct{}
-	LogoutVM  struct{}
-	RefreshVM struct{}
+	LoginVM struct {
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
+	}
+	RefreshVM struct {
+		AccessToken string `json:"access_token"`
+	}
 )

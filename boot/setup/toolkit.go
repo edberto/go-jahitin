@@ -3,6 +3,7 @@ package setup
 import (
 	"database/sql"
 	"go-jahitin/apipackages"
+	"go-jahitin/helper/auth"
 	"go-jahitin/helper/config"
 	"go-jahitin/helper/constants"
 	"log"
@@ -36,6 +37,12 @@ func SetupToolkit(cfg config.IConfig) *apipackages.Toolkit {
 	}
 	tk.Validator = val
 
+	accessAuth := SetupAccessAuth(cfg)
+	tk.AccessAuth = accessAuth
+
+	refreshAuth := SetupRefreshAuth(cfg)
+	tk.RefreshAuth = refreshAuth
+
 	return tk
 }
 
@@ -57,4 +64,24 @@ func SetupPostgresqlDB(cfg config.IConfig) *sql.DB {
 	}
 
 	return db
+}
+
+func SetupAccessAuth(cfg config.IConfig) auth.IAuth {
+	key := os.Getenv("KEY_ACCESS")
+	if key == "" {
+		key = cfg.GetString("key.access")
+	}
+
+	iauth := auth.NewAuth(key)
+	return iauth
+}
+
+func SetupRefreshAuth(cfg config.IConfig) auth.IAuth {
+	key := os.Getenv("KEY_REFRESH")
+	if key == "" {
+		key = cfg.GetString("key.refresh")
+	}
+
+	iauth := auth.NewAuth(key)
+	return iauth
 }

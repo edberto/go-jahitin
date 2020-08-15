@@ -36,7 +36,7 @@ func main() {
 	r := gin.Default()
 
 	toolkit := setup.SetupToolkit(cfg)
-	boot.InitializeRoutes(r, cfg, toolkit)
+	boot.InitializeRoutes(r, toolkit)
 
 	r.Run(fmt.Sprintf("%s:%s", host, port))
 }

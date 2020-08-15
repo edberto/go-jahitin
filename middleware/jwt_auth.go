@@ -5,17 +5,17 @@ import (
 	"database/sql"
 	"fmt"
 	"go-jahitin/apipackages"
-	"go-jahitin/helper/auth"
-	"go-jahitin/helper/config"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-func SetAuthCtx(j auth.IAuth, cfg config.IConfig, toolkit *apipackages.Toolkit) gin.HandlerFunc {
+func SetupAuthMiddleware(toolkit *apipackages.Toolkit) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		req := c.Request
+
+		j := toolkit.AccessAuth
 
 		claims, err := j.ExtractClaims(req)
 		if err != nil {
