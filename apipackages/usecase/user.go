@@ -25,7 +25,6 @@ type (
 	}
 
 	RegisterUserParam struct {
-		Address  string
 		Email    string
 		Phone    string
 		Name     string
@@ -67,10 +66,9 @@ func (uc *User) Register(param RegisterUserParam) (viewmodel.UserVM, error) {
 	role := constants.RoleAtoI[param.Role]
 	if role == constants.TailorRoleI {
 		tailor, err = uc.TailorModel.InsertOne(model.InsertOneTailorParam{
-			Address: param.Address,
-			Email:   param.Email,
-			Name:    param.Name,
-			UUID:    uuid.NewUUID(),
+			Phone: param.Phone,
+			Email: param.Email,
+			UUID:  uuid.NewUUID(),
 		})
 		if err != nil {
 			return *new(viewmodel.UserVM), err
@@ -79,7 +77,7 @@ func (uc *User) Register(param RegisterUserParam) (viewmodel.UserVM, error) {
 
 	user, err = uc.UserModel.InsertOne(model.InsertOneUserParam{
 		TailorID: tailor.ID,
-		Address:  param.Address,
+		Phone:    param.Phone,
 		Email:    param.Email,
 		Name:     param.Name,
 		Password: string(hash),
@@ -94,7 +92,7 @@ func (uc *User) Register(param RegisterUserParam) (viewmodel.UserVM, error) {
 	return viewmodel.UserVM{
 		ID:       user.ID,
 		TailorID: int(user.TailorID.Int32),
-		Address:  user.Address,
+		Phone:    user.Phone,
 		Email:    user.Email,
 		Name:     user.Name,
 		Password: param.Password,
@@ -117,7 +115,7 @@ func (uc *User) GetOne(param GetOneUserParam) (viewmodel.UserVM, error) {
 	return viewmodel.UserVM{
 		ID:       user.ID,
 		TailorID: int(user.TailorID.Int32),
-		Address:  user.Address,
+		Phone:    user.Phone,
 		Email:    user.Email,
 		Name:     user.Name,
 		Role:     constants.RoleItoA[user.Role],

@@ -21,17 +21,21 @@ type (
 	}
 
 	GetAllTailorParam struct {
-		IDs []int
+		IDs     []int
+		Keyword string
 	}
 
 	InsertOneTailorParam struct {
-		Address string
-		Email   string
-		Name    string
-		UUID    string
+		Phone string
+		Email string
+		UUID  string
 	}
 
-	UpdateOneTailorParam struct{}
+	UpdateOneTailorParam struct {
+		Name    string
+		Address string
+		ID      int
+	}
 )
 
 func NewTailorModel(tk *apipackages.Toolkit) ITailor {
@@ -44,7 +48,7 @@ func (model *Tailor) GetAll(param GetAllTailorParam) ([]entity.TailorEntity, err
 	res := new([]entity.TailorEntity)
 
 	selectQ := `
-		SELECT id, uuid, name, address, email, created_at, updated_at
+		SELECT id, uuid, name, address, email, phone, created_at, updated_at
 		FROM tailors
 	`
 
@@ -53,6 +57,10 @@ func (model *Tailor) GetAll(param GetAllTailorParam) ([]entity.TailorEntity, err
 	if p := param.IDs; len(p) != 0 {
 		whereQ += ` AND id = ANY(?)`
 		whereP = append(whereP, pq.Array(p))
+	}
+	if p := param.Keyword; p != "" {
+		whereQ += ` AND name ILIKE ?`
+		whereP = append(whereP, fmt.Sprintf("%%%s%%", p))
 	}
 
 	q := helper.ReplacePlaceholder(fmt.Sprintf("%s%s", selectQ, whereQ), 1)
@@ -66,7 +74,7 @@ func (model *Tailor) GetAll(param GetAllTailorParam) ([]entity.TailorEntity, err
 	for rows.Next() {
 		t := new(entity.TailorEntity)
 
-		if err := rows.Scan(&t.ID, &t.UUID, &t.Name, &t.Address, &t.Email, &t.CreatedAt, &t.UpdatedAt); err != nil {
+		if err := rows.Scan(&t.ID, &t.UUID, &t.Name, &t.Address, &t.Email, &t.Phone, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return *new([]entity.TailorEntity), err
 		}
 
@@ -80,14 +88,14 @@ func (model *Tailor) InsertOne(param InsertOneTailorParam) (entity.TailorEntity,
 	res := new(entity.TailorEntity)
 
 	q := `
-		INSERT INTO tailors (address, email, name, uuid)
-		VALUES (?, ?, ?, ?)
-		RETURNING id, address, email, name, uuid, created_at, updated_at
+		INSERT INTO tailors (phone, email, uuid)
+		VALUES (?, ?, ?)
+		RETURNING id, phone, address, email, name, uuid, created_at, updated_at
 	`
-	p := []interface{}{param.Address, param.Email, param.Name, param.UUID}
+	p := []interface{}{param.Phone, param.Email, param.UUID}
 
 	q = helper.ReplacePlaceholder(q, 1)
-	err := model.Toolkit.DB.QueryRow(q, p...).Scan(&res.ID, &res.Address, &res.Email, &res.Name, &res.UUID, &res.CreatedAt, &res.UpdatedAt)
+	err := model.Toolkit.DB.QueryRow(q, p...).Scan(&res.ID, &res.Phone, &res.Address, &res.Email, &res.Name, &res.UUID, &res.CreatedAt, &res.UpdatedAt)
 
 	return *res, err
 }
@@ -95,5 +103,16 @@ func (model *Tailor) InsertOne(param InsertOneTailorParam) (entity.TailorEntity,
 func (model *Tailor) UpdateOne(param UpdateOneTailorParam) (entity.TailorEntity, error) {
 	res := new(entity.TailorEntity)
 
-	return *res, nil
+	q := `
+		UPDATE tailors
+		SET updated_at = NOW(), name = ?, address = ?
+		WHERE id = ?
+		RETURNING id, phone, address, email, name, uuid, created_at, updated_at
+	`
+	p := []interface{}{param.Name, param.Address, param.ID}
+
+	q = helper.ReplacePlaceholder(q, 1)
+	err := model.Toolkit.DB.QueryRow(q, p...).Scan(&res.ID, &res.Phone, &res.Address, &res.Email, &res.Name, &res.UUID, &res.CreatedAt, &res.UpdatedAt)
+
+	return *res, err
 }

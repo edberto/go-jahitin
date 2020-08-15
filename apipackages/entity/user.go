@@ -9,7 +9,7 @@ type (
 	UserEntity struct {
 		ID        int
 		Role      int
-		Address   string
+		Phone     string
 		Email     string
 		Name      string
 		Password  string

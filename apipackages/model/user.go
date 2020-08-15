@@ -27,7 +27,7 @@ type (
 	InsertOneUserParam struct {
 		Role     int
 		TailorID int
-		Address  string
+		Phone    string
 		Email    string
 		Name     string
 		Password string
@@ -51,7 +51,7 @@ func (model *User) GetAll(param GetAllUserParam) ([]entity.UserEntity, error) {
 	res := new([]entity.UserEntity)
 
 	selectQ := `
-		SELECT id, role, address, email, name, username, uuid, tailor_id, created_at, updated_at
+		SELECT id, role, phone, email, name, username, uuid, tailor_id, created_at, updated_at
 		FROM users
 	`
 
@@ -73,7 +73,7 @@ func (model *User) GetAll(param GetAllUserParam) ([]entity.UserEntity, error) {
 	for rows.Next() {
 		t := new(entity.UserEntity)
 
-		if err := rows.Scan(&t.ID, &t.Role, &t.Address, &t.Email, &t.Name, &t.Username, &t.UUID, &t.TailorID, &t.CreatedAt, &t.UpdatedAt); err != nil {
+		if err := rows.Scan(&t.ID, &t.Role, &t.Phone, &t.Email, &t.Name, &t.Username, &t.UUID, &t.TailorID, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return *new([]entity.UserEntity), err
 		}
 
@@ -87,14 +87,14 @@ func (model *User) InsertOne(param InsertOneUserParam) (entity.UserEntity, error
 	res := new(entity.UserEntity)
 
 	q := `
-		INSERT INTO users (role, tailor_id, address, email, name, password, username, uuid) 
+		INSERT INTO users (role, tailor_id, phone, email, name, password, username, uuid) 
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?) 
-		RETURNING id, role, address, email, name, password, username, uuid, tailor_id, created_at, updated_at
+		RETURNING id, role, phone, email, name, password, username, uuid, tailor_id, created_at, updated_at
 	`
-	p := []interface{}{param.Role, param.TailorID, param.Address, param.Email, param.Name, param.Password, param.Username, param.UUID}
+	p := []interface{}{param.Role, param.TailorID, param.Phone, param.Email, param.Name, param.Password, param.Username, param.UUID}
 
 	q = helper.ReplacePlaceholder(q, 1)
-	err := model.Toolkit.DB.QueryRow(q, p...).Scan(&res.ID, &res.Role, &res.Address, &res.Email, &res.Name, &res.Password, &res.Username, &res.UUID, &res.TailorID, &res.CreatedAt, &res.UpdatedAt)
+	err := model.Toolkit.DB.QueryRow(q, p...).Scan(&res.ID, &res.Role, &res.Phone, &res.Email, &res.Name, &res.Password, &res.Username, &res.UUID, &res.TailorID, &res.CreatedAt, &res.UpdatedAt)
 
 	return *res, err
 }
@@ -103,7 +103,7 @@ func (model *User) GetOne(param GetOneUserParam) (entity.UserEntity, error) {
 	res := new(entity.UserEntity)
 
 	selectQ := `
-		SELECT id, role, address, email, name, password, username, uuid, tailor_id, created_at, updated_at
+		SELECT id, role, phone, email, name, password, username, uuid, tailor_id, created_at, updated_at
 		FROM users
 	`
 
@@ -121,7 +121,7 @@ func (model *User) GetOne(param GetOneUserParam) (entity.UserEntity, error) {
 	limitQ := ` ORDER BY updated_at DESC LIMIT 1`
 
 	q := helper.ReplacePlaceholder(fmt.Sprintf("%s%s%s", selectQ, whereQ, limitQ), 1)
-	err := model.Toolkit.DB.QueryRow(q, whereP...).Scan(&res.ID, &res.Role, &res.Address, &res.Email, &res.Name, &res.Password, &res.Username, &res.UUID, &res.TailorID, &res.CreatedAt, &res.UpdatedAt)
+	err := model.Toolkit.DB.QueryRow(q, whereP...).Scan(&res.ID, &res.Role, &res.Phone, &res.Email, &res.Name, &res.Password, &res.Username, &res.UUID, &res.TailorID, &res.CreatedAt, &res.UpdatedAt)
 
 	return *res, err
 }

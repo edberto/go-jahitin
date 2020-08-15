@@ -2,7 +2,6 @@ package request
 
 type (
 	Register struct {
-		Address  string `json:"address"`
 		Email    string `json:"email" validate:"required,email"`
 		Phone    string `json:"phone" validate:"required,startswith=08,min=10,max=13"`
 		Name     string `json:"name" validate:"required"`

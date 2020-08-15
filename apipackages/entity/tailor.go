@@ -1,14 +1,18 @@
 package entity
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type (
 	TailorEntity struct {
 		ID        int
-		Address   string
 		Email     string
-		Name      string
 		UUID      string
+		Phone     sql.NullString
+		Address   sql.NullString
+		Name      sql.NullString
 		CreatedAt time.Time
 		UpdatedAt time.Time
 	}

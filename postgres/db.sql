@@ -88,3 +88,12 @@ CREATE TABLE public.tailor_materials (
     price REAL NOT NULL, 
 );
 
+ALTER TABLE public.users
+DROP COLUMN address;
+
+ALTER TABLE public.tailors
+ALTER COLUMN name DROP CONSTRAINT NOT NULL
+ADD COLUMN phone VARCHAR(30) DEFAULT '' NOT NULL;
+
+ALTER TABLE public.orders
+ADD COLUMN user_address VARCHAR(255);

@@ -87,6 +87,7 @@ func (h *Tailor) GetAll(c *gin.Context) {
 		IDs:         ids,
 		MaterialIDs: materialIDs,
 		ModelIDs:    modelIDs,
+		Keyword:     c.Query("keyword"),
 	})
 	if err != nil {
 		switch err {

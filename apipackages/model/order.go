@@ -21,8 +21,10 @@ type (
 	}
 
 	GetAllOrderParam struct {
+		IDs       []int
 		UserIDs   []int
 		TailorIDs []int
+		Status    []int
 	}
 
 	InsertOneOrderParam struct {
@@ -50,7 +52,7 @@ func (model *Order) GetAll(param GetAllOrderParam) ([]entity.OrderEntity, error)
 	res := new([]entity.OrderEntity)
 
 	selectQ := `
-		SELECT id, uuid, user_id, tailor_id, status, price, specification, created_at, updated_at
+		SELECT id, uuid, user_id, tailor_id, status, price, specification, user_address, created_at, updated_at
 		FROM orders
 	`
 
@@ -62,6 +64,10 @@ func (model *Order) GetAll(param GetAllOrderParam) ([]entity.OrderEntity, error)
 	}
 	if p := param.TailorIDs; len(p) != 0 {
 		whereQ += ` AND tailor_id = ANY(?)`
+		whereP = append(whereP, pq.Array(p))
+	}
+	if p := param.Status; len(p) != 0 {
+		whereQ += ` AND status = ANY(?)`
 		whereP = append(whereP, pq.Array(p))
 	}
 
@@ -76,7 +82,7 @@ func (model *Order) GetAll(param GetAllOrderParam) ([]entity.OrderEntity, error)
 	for rows.Next() {
 		t := new(entity.OrderEntity)
 
-		if err := rows.Scan(&t.ID, &t.UUID, &t.UserID, &t.TailorID, &t.Status, &t.Price, &t.Specification, &t.CreatedAt, &t.UpdatedAt); err != nil {
+		if err := rows.Scan(&t.ID, &t.UUID, &t.UserID, &t.TailorID, &t.Status, &t.Price, &t.Specification, &t.UserAddress, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return *new([]entity.OrderEntity), err
 		}
 

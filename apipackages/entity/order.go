@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -17,6 +18,7 @@ type (
 		UUID          string
 		CreatedAt     time.Time
 		UpdatedAt     time.Time
+		UserAddress   sql.NullString
 		Specification Specification
 	}
 

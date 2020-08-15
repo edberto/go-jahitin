@@ -4,7 +4,7 @@ type (
 	UserVM struct {
 		ID       int
 		TailorID int
-		Address  string
+		Phone    string
 		Email    string
 		Name     string
 		Password string

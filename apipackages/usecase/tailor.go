@@ -25,6 +25,7 @@ type (
 		IDs         []int
 		MaterialIDs []int
 		ModelIDs    []int
+		Keyword     string
 	}
 )
 
@@ -107,7 +108,8 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 	}
 
 	tailors, err := uc.TailorModel.GetAll(model.GetAllTailorParam{
-		IDs: ids,
+		IDs:     ids,
+		Keyword: param.Keyword,
 	})
 	if err != nil {
 		return *new([]viewmodel.TailorVM), err
@@ -117,9 +119,10 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 		temp := viewmodel.TailorVM{
 			ID:      t.ID,
 			UUID:    t.UUID,
-			Name:    t.Name,
+			Name:    t.Name.String,
+			Phone:   t.Phone.String,
 			Email:   t.Email,
-			Address: t.Address,
+			Address: t.Address.String,
 		}
 
 		if v, e := tailorModelMap[t.ID]; e {

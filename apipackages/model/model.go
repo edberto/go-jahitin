@@ -10,30 +10,30 @@ import (
 )
 
 type (
-	IMaterial interface {
-		GetAll(param GetAllMaterialParam) ([]entity.MaterialEntity, error)
+	IModel interface {
+		GetAll(param GetAllModelParam) ([]entity.ModelEntity, error)
 	}
 
-	Material struct {
+	Model struct {
 		Toolkit *apipackages.Toolkit
 	}
 
-	GetAllMaterialParam struct {
+	GetAllModelParam struct {
 		IDs []int
 	}
 )
 
-func NewMaterialModel(tk *apipackages.Toolkit) IMaterial {
-	return &Material{
+func NewModelModel(tk *apipackages.Toolkit) IModel {
+	return &Model{
 		Toolkit: tk,
 	}
 }
 
-func (model *Material) GetAll(param GetAllMaterialParam) ([]entity.MaterialEntity, error) {
-	res := new([]entity.MaterialEntity)
+func (model *Model) GetAll(param GetAllModelParam) ([]entity.ModelEntity, error) {
+	res := new([]entity.ModelEntity)
 
 	selectQ := `
-		SELECT id, uuid, name, color, detail, created_at, updated_at
+		SELECT id, uuid, name, detail, created_at, updated_at
 		FROM materials
 	`
 
@@ -48,15 +48,15 @@ func (model *Material) GetAll(param GetAllMaterialParam) ([]entity.MaterialEntit
 
 	rows, err := model.Toolkit.DB.Query(q, whereP...)
 	if err != nil {
-		return *new([]entity.MaterialEntity), err
+		return *new([]entity.ModelEntity), err
 	}
 
 	defer rows.Close()
 	for rows.Next() {
-		t := new(entity.MaterialEntity)
+		t := new(entity.ModelEntity)
 
-		if err := rows.Scan(&t.ID, &t.UUID, &t.Name, &t.Color, &t.Detail, &t.CreatedAt, &t.UpdatedAt); err != nil {
-			return *new([]entity.MaterialEntity), err
+		if err := rows.Scan(&t.ID, &t.UUID, &t.Name, &t.Detail, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			return *new([]entity.ModelEntity), err
 		}
 
 		*res = append(*res, *t)
