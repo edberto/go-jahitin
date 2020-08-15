@@ -19,7 +19,6 @@ type (
 	}
 
 	Session struct {
-		SessionModel   model.ISession
 		UserModel      model.IUser
 		UserTokenModel model.IUserToken
 		Toolkit        *apipackages.Toolkit
@@ -39,7 +38,6 @@ type (
 
 func NewSessionUC(tk *apipackages.Toolkit) ISession {
 	return &Session{
-		SessionModel:   model.NewSessionModel(tk),
 		UserModel:      model.NewUserModel(tk),
 		UserTokenModel: model.NewUserTokenModel(tk),
 		Toolkit:        tk,

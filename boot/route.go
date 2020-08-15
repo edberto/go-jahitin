@@ -9,17 +9,13 @@ import (
 )
 
 func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
-	//Handlers
-	sessionHandler := handler.NewSessionHandler(toolkit)
-	userHandler := handler.NewUserHandler(toolkit)
-
 	//Middlewares
 	authMiddleware := middleware.SetupAuthMiddleware(toolkit)
 
 	//Routes
 	api := r.Group("")
 	{
-
+		sessionHandler := handler.NewSessionHandler(toolkit)
 		session := api.Group("/session")
 		{
 			session.POST("/login", sessionHandler.Login)
@@ -28,12 +24,19 @@ func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 			session.DELETE("/logout", sessionHandler.Logout)
 		}
 
+		userHandler := handler.NewUserHandler(toolkit)
 		user := api.Group("/user")
 		{
 			user.POST("/register", userHandler.Register)
 			user.Use(authMiddleware)
 			user.GET("/:id", userHandler.GetOne)
 
+		}
+
+		tailorHandler := handler.NewTailorHandler(toolkit)
+		tailor := api.Group("/tailor")
+		{
+			tailor.GET("/", tailorHandler.GetAll)
 		}
 	}
 }

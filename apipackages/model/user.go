@@ -5,16 +5,23 @@ import (
 	"go-jahitin/apipackages"
 	"go-jahitin/apipackages/entity"
 	"go-jahitin/helper"
+
+	"github.com/lib/pq"
 )
 
 type (
 	IUser interface {
-		InsertOne(param InsertOneUserParam) (entity.UserEntity, error)
+		GetAll(param GetAllUserParam) ([]entity.UserEntity, error)
 		GetOne(param GetOneUserParam) (entity.UserEntity, error)
+		InsertOne(param InsertOneUserParam) (entity.UserEntity, error)
 	}
 
 	User struct {
 		Toolkit *apipackages.Toolkit
+	}
+
+	GetAllUserParam struct {
+		IDs []int
 	}
 
 	InsertOneUserParam struct {
@@ -38,6 +45,42 @@ func NewUserModel(tk *apipackages.Toolkit) IUser {
 	return &User{
 		Toolkit: tk,
 	}
+}
+
+func (model *User) GetAll(param GetAllUserParam) ([]entity.UserEntity, error) {
+	res := new([]entity.UserEntity)
+
+	selectQ := `
+		SELECT id, role, address, email, name, username, uuid, tailor_id, created_at, updated_at
+		FROM users
+	`
+
+	whereQ := ` WHERE deleted_at IS NULL`
+	whereP := []interface{}{}
+	if p := param.IDs; len(p) != 0 {
+		whereQ += ` AND id = ANY(?)`
+		whereP = append(whereP, pq.Array(p))
+	}
+
+	q := helper.ReplacePlaceholder(fmt.Sprintf("%s%s", selectQ, whereQ), 1)
+
+	rows, err := model.Toolkit.DB.Query(q, whereP...)
+	if err != nil {
+		return *new([]entity.UserEntity), err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		t := new(entity.UserEntity)
+
+		if err := rows.Scan(&t.ID, &t.Role, &t.Address, &t.Email, &t.Name, &t.Username, &t.UUID, &t.TailorID, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			return *new([]entity.UserEntity), err
+		}
+
+		*res = append(*res, *t)
+	}
+
+	return *res, err
 }
 
 func (model *User) InsertOne(param InsertOneUserParam) (entity.UserEntity, error) {

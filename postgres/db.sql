@@ -16,6 +16,7 @@ CREATE TABLE public.users (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ,
     name VARCHAR(255) NOT NULL,
+    phone VARCHAR(30) NOT NULL,
     username VARCHAR(50) UNIQUE NOT NULL,
     address VARCHAR(400),
     email VARCHAR(100) NOT NULL,
@@ -32,10 +33,18 @@ CREATE TABLE public.orders (
     deleted_at TIMESTAMPTZ,
     user_id INTEGER NOT NULL REFERENCES users ON UPDATE CASCADE ON DELETE RESTRICT,
     tailor_id INTEGER NOT NULL REFERENCES tailors ON UPDATE CASCADE ON DELETE RESTRICT,
-    quantity INTEGER NOT NULL,
     status INTEGER NOT NULL,
     specification jsonb,
     price REAL NOT NULL
+);
+
+CREATE TABLE public.user_tokens (
+    uuid VARCHAR(50) NOT NULL PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
+    user_id INTEGER NOT NULL REFERENCES users ON UPDATE CASCADE ON DELETE CASCADE,
+    expired_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE public.materials (
@@ -44,17 +53,38 @@ CREATE TABLE public.materials (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ,
-    name VARCHAR(255),
-    cost REAL DEFAULT 0 NOT NULL,
-    detail VARCHAR(255),
-    color VARCHAR(100)
+    name VARCHAR(50) NOT NULL,
+    color VARCHAR(50) NOT NULL,
+    detail VARCHAR(400)
 );
 
-CREATE TABLE public.user_tokens (
-    uuid VARCHAR(50) NOT NULL PRIMARY KEY,
+CREATE TABLE public.models (
+    id SERIAL PRIMARY KEY,
+    uuid VARCHAR(50) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ,
-    user_id INTEGER NOT NULL,
-    expired_at TIMESTAMPTZ NOT NULL
-)
+    name VARCHAR(255) NOT NULL,
+    detail VARCHAR(400)
+);
+
+CREATE TABLE public.tailor_models (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
+    tailor_id INTEGER NOT NULL REFERENCES tailors ON UPDATE CASCADE ON DELETE CASCADE,
+    model_id INTEGER NOT NULL REFERENCES models ON UPDATE CASCADE ON DELETE RESTRICT,
+    price REAL NOT NULL, 
+);
+
+CREATE TABLE public.tailor_materials (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
+    tailor_id INTEGER NOT NULL REFERENCES tailors ON UPDATE CASCADE ON DELETE CASCADE,
+    material_id INTEGER NOT NULL REFERENCES models ON UPDATE CASCADE ON DELETE RESTRICT,
+    price REAL NOT NULL, 
+);
+
