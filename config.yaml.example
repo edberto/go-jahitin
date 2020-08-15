@@ -1,0 +1,7 @@
+app:
+    mode: debug
+    host: localhost
+    port: 8000
+database:
+    postgresql:
+        uri: 
