@@ -1,21 +1,23 @@
 package boot
 
 import (
-	"go-jahitin/api-packages/handler"
+	"go-jahitin/apipackages"
+	"go-jahitin/apipackages/handler"
 	"go-jahitin/boot/setup"
 	"go-jahitin/helper/config"
 
 	"github.com/gin-gonic/gin"
 )
 
-var (
-	sessionHandler = handler.NewSessionHandler()
-	userHandler    = handler.NewUserHandler()
-)
+func InitializeRoutes(r *gin.Engine, cfg config.IConfig, toolkit *apipackages.Toolkit) {
+	//Handlers
+	sessionHandler := handler.NewSessionHandler(toolkit)
+	userHandler := handler.NewUserHandler(toolkit)
 
-func InitializeRoutes(r *gin.Engine, cfg config.IConfig) {
-	authMiddleware := setup.SetupAuthMiddleware(cfg)
+	//Middlewares
+	authMiddleware := setup.SetupAuthMiddleware(cfg, toolkit)
 
+	//Routes
 	api := r.Group("")
 	{
 

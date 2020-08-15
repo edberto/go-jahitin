@@ -1,7 +1,8 @@
 package handler
 
 import (
-	"go-jahitin/api-packages/usecase"
+	"go-jahitin/apipackages"
+	"go-jahitin/apipackages/usecase"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,12 +16,14 @@ type (
 
 	Session struct {
 		SessionUC usecase.ISession
+		Toolkit   *apipackages.Toolkit
 	}
 )
 
-func NewSessionHandler() ISession {
+func NewSessionHandler(tk *apipackages.Toolkit) ISession {
 	return &Session{
-		SessionUC: usecase.NewSessionUC(),
+		SessionUC: usecase.NewSessionUC(tk),
+		Toolkit:   tk,
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"go-jahitin/apipackages"
 	"go-jahitin/helper/auth"
 	"go-jahitin/helper/config"
 	"net/http"
@@ -12,8 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetAuthCtx(j auth.IAuth, cfg config.IConfig) gin.HandlerFunc {
-	return func (c *gin.Context) {
+func SetAuthCtx(j auth.IAuth, cfg config.IConfig, toolkit *apipackages.Toolkit) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		req := c.Request
 
 		claims, err := j.ExtractClaims(req)
@@ -22,7 +23,7 @@ func SetAuthCtx(j auth.IAuth, cfg config.IConfig) gin.HandlerFunc {
 			return
 		}
 
-		userToken, err := j.GetUserToken(GetPostgres(c), claims["access_uuid"].(string))
+		userToken, err := j.GetUserToken(toolkit.DB, claims["access_uuid"].(string))
 		if err != nil {
 			switch err {
 			case sql.ErrNoRows:

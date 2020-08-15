@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go-jahitin/boot"
+	"go-jahitin/boot/setup"
 	"go-jahitin/helper/config"
 	"os"
 
@@ -33,8 +34,9 @@ func main() {
 	}
 
 	r := gin.Default()
-	boot.Setup(r, cfg)
-	boot.InitializeRoutes(r, cfg)
+
+	toolkit := setup.SetupToolkit(cfg)
+	boot.InitializeRoutes(r, cfg, toolkit)
 
 	r.Run(fmt.Sprintf("%s:%s", host, port))
 }
