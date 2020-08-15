@@ -34,7 +34,7 @@ func main() {
 
 	r := gin.Default()
 	boot.Setup(r, cfg)
-	boot.InitializeRoutes(r)
+	boot.InitializeRoutes(r, cfg)
 
 	r.Run(fmt.Sprintf("%s:%s", host, port))
 }

@@ -27,6 +27,5 @@ func SetupPostgreSQL(cfg config.IConfig) gin.HandlerFunc {
 		log.Print("Postgresql database successfully connected")
 	}
 
-	handlerFunc := middleware.SetPostgresCtx(db)
-	return handlerFunc
+	return middleware.SetPostgresCtx(db)
 }
