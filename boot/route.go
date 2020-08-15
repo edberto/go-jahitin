@@ -15,6 +15,12 @@ func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 	//Routes
 	api := r.Group("")
 	{
+		api.GET("/", func(c *gin.Context) {
+			c.JSON(200, gin.H{
+				"message": "go-jahitin",
+			})
+		})
+
 		sessionHandler := handler.NewSessionHandler(toolkit)
 		session := api.Group("/session")
 		{
