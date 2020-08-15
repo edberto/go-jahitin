@@ -20,7 +20,7 @@ func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 	api := r.Group("")
 	{
 
-		api.GET("/ping", func(c *gin.Context) {
+		api.GET("/", func(c *gin.Context) {
 			c.JSON(200, gin.H{
 				"message": "go-jahitin",
 			})
