@@ -10,7 +10,7 @@ import (
 
 func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 	//Middlewares
-	authMiddleware := middleware.SetupAuthMiddleware(toolkit)
+	_ = middleware.SetupAuthMiddleware(toolkit)
 
 	//Routes
 	api := r.Group("")
@@ -26,7 +26,6 @@ func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 		{
 			session.POST("/login", sessionHandler.Login)
 			session.POST("/refresh", sessionHandler.Refresh)
-			session.Use(authMiddleware)
 			session.DELETE("/logout", sessionHandler.Logout)
 		}
 
@@ -34,7 +33,6 @@ func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 		user := api.Group("/user")
 		{
 			user.POST("/register", userHandler.Register)
-			user.Use(authMiddleware)
 			user.GET("/:id", userHandler.GetOne)
 
 		}
@@ -44,7 +42,6 @@ func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 		tailorModelHandler := handler.NewTailorModelHandler(toolkit)
 		tailor := api.Group("/tailor")
 		{
-			tailor.Use(authMiddleware)
 			tailor.GET("/", tailorHandler.GetAll)
 			tailor.POST("/model", tailorModelHandler.InsertBulk)
 			tailor.POST("/material", tailorMaterialHandler.InsertBulk)
@@ -53,7 +50,6 @@ func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 		orderHandler := handler.NewOrderHandler(toolkit)
 		order := api.Group("/order")
 		{
-			tailor.Use(authMiddleware)
 			order.GET("/", orderHandler.GetAll)
 			order.GET("/:id", orderHandler.GetOne)
 			order.PUT("/:id", orderHandler.UpdateStatusOne)
@@ -63,14 +59,12 @@ func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 		materialHandler := handler.NewMaterialHandler(toolkit)
 		material := api.Group("/material")
 		{
-			material.Use(authMiddleware)
 			material.GET("/", materialHandler.GetAll)
 		}
 
 		mdlHandler := handler.NewModelHandler(toolkit)
 		mdl := api.Group("/model")
 		{
-			mdl.Use(authMiddleware)
 			mdl.GET("/", mdlHandler.GetAll)
 		}
 
