@@ -31,11 +31,13 @@ func SetupAuthMiddleware(toolkit *apipackages.Toolkit) gin.HandlerFunc {
 				return
 			default:
 				c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Internal Server Error!"))
+				return
 			}
 		}
 
 		if userToken.ExpiredAt.Before(time.Now()) {
 			c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("Token Expired!"))
+			return
 		}
 
 		req = req.WithContext(context.WithValue(req.Context(), "userID", userToken.UserID))
