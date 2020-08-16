@@ -99,6 +99,8 @@ func (model *TailorModel) InsertBulk(param []InsertBulkTailorModelParam) (int, e
 		}
 	}
 
+	q = helper.ReplacePlaceholder(q, 1)
+
 	stmt, err := trx.Prepare(q)
 	if err != nil {
 		if err := trx.Rollback(); err != nil {

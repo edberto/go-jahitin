@@ -40,10 +40,14 @@ func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 		}
 
 		tailorHandler := handler.NewTailorHandler(toolkit)
+		tailorMaterialHandler := handler.NewTailorMaterialHandler(toolkit)
+		tailorModelHandler := handler.NewTailorModelHandler(toolkit)
 		tailor := api.Group("/tailor")
 		{
 			tailor.Use(authMiddleware)
 			tailor.GET("/", tailorHandler.GetAll)
+			tailor.POST("/model", tailorModelHandler.InsertBulk)
+			tailor.POST("/material", tailorMaterialHandler.InsertBulk)
 		}
 
 		orderHandler := handler.NewOrderHandler(toolkit)
