@@ -79,6 +79,8 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 			mdl := tailorModelMap[t.TailorID]
 			mdl = append(mdl, t)
 			tailorModelMap[t.TailorID] = mdl
+
+			ids = append(ids, t.TailorID)
 		}
 
 		for i, id := range ids {
@@ -106,6 +108,8 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 			material := tailorMaterialMap[t.TailorID]
 			material = append(material, t)
 			tailorMaterialMap[t.TailorID] = material
+
+			ids = append(ids, t.TailorID)
 		}
 
 		for i, id := range ids {

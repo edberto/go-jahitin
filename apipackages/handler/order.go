@@ -109,7 +109,7 @@ func (h *Order) GetAll(c *gin.Context) {
 }
 
 func (h *Order) GetOne(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param(":id"))
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, Error{"Invalid ID"})
 		log.Print(errors.Wrap(err, "Invalid Order ID"))
