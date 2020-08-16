@@ -75,11 +75,23 @@ func (h *Tailor) GetAll(c *gin.Context) {
 		id, err := strconv.Atoi(i)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, Error{"Invalid Model ID"})
-			log.Print(errors.Wrap(err, "Failed to Model ID"))
+			log.Print(errors.Wrap(err, "Failed to convert Model ID"))
 			return
 		}
 
 		modelIDs = append(modelIDs, id)
+	}
+
+	priceA := c.Query("price")
+	var price float64
+	var err error
+	if priceA != "" {
+		price, err = strconv.ParseFloat(priceA, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, Error{"Invalid Price"})
+			log.Print(errors.Wrap(err, "Failed to convert Price"))
+			return
+		}
 	}
 
 	res, err := h.TailorUC.GetAll(usecase.GetAllTailorParam{
@@ -88,6 +100,7 @@ func (h *Tailor) GetAll(c *gin.Context) {
 		MaterialIDs: materialIDs,
 		ModelIDs:    modelIDs,
 		Keyword:     c.Query("keyword"),
+		Price:       price,
 	})
 	if err != nil {
 		switch err {

@@ -39,12 +39,18 @@ type (
 	}
 
 	InsertOneOrderParam struct {
-		UserID        int
-		TailorID      int
-		Status        int
-		Price         float64
-		UUID          string
-		Specification entity.Specification
+		UserID     int
+		TailorID   int
+		ModelID    int
+		MaterialID int
+		XSQty      int
+		SQty       int
+		MQty       int
+		LQty       int
+		XLQty      int
+		XXLQty     int
+		LLLQty     int
+		Price      float64
 	}
 
 	UpdateStatusOneOrderParam struct {
@@ -186,10 +192,22 @@ func (uc *Order) InsertOne(param InsertOneOrderParam) (viewmodel.OrderVM, error)
 	order, err := uc.OrderModel.InsertOne(model.InsertOneOrderParam{
 		UserID:        param.UserID,
 		TailorID:      param.TailorID,
-		Status:        param.Status,
+		Status:        constants.OrderStatusWaitingI,
 		Price:         param.Price,
 		UUID:          uuid.NewUUID(),
-		Specification: param.Specification,
+		Specification: entity.Specification {
+			MaterialID: param.MaterialID,
+			ModelID: param.ModelID,
+			Qty: entity.Qty{
+				XS: param.XSQty,
+				S: param.SQty,
+				M: param.MQty,
+				L: param.LQty,
+				XL: param.XLQty,
+				XXL: param.XXLQty,
+				LLL: param.LLLQty,
+			},
+		},
 	})
 	if err != nil {
 		return *new(viewmodel.OrderVM), err

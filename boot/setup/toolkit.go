@@ -23,6 +23,13 @@ var (
 		}
 		return true
 	}
+	statusCheckerTag  = "statuscheck"
+	statusCheckerFunc = func(fl validator.FieldLevel) bool {
+		if _, e := constants.OrderStatusAtoI[strings.ToLower(fl.Field().String())]; !e {
+			return false
+		}
+		return true
+	}
 )
 
 func SetupToolkit(cfg config.IConfig) *apipackages.Toolkit {
@@ -33,6 +40,9 @@ func SetupToolkit(cfg config.IConfig) *apipackages.Toolkit {
 
 	val := validator.New()
 	if err := val.RegisterValidation(roleCheckerTag, roleCheckerFunc); err != nil {
+		log.Printf("Failed to initiate role checker validator: %v", err)
+	}
+	if err := val.RegisterValidation(statusCheckerTag, statusCheckerFunc); err != nil {
 		log.Printf("Failed to initiate role checker validator: %v", err)
 	}
 	tk.Validator = val

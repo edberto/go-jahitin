@@ -42,7 +42,33 @@ func InitializeRoutes(r *gin.Engine, toolkit *apipackages.Toolkit) {
 		tailorHandler := handler.NewTailorHandler(toolkit)
 		tailor := api.Group("/tailor")
 		{
+			tailor.Use(authMiddleware)
 			tailor.GET("/", tailorHandler.GetAll)
 		}
+
+		orderHandler := handler.NewOrderHandler(toolkit)
+		order := api.Group("/order")
+		{
+			tailor.Use(authMiddleware)
+			order.GET("/", orderHandler.GetAll)
+			order.GET("/:id", orderHandler.GetOne)
+			order.PUT("/:id", orderHandler.UpdateStatusOne)
+			order.POST("/", orderHandler.InsertOne)
+		}
+
+		materialHandler := handler.NewMaterialHandler(toolkit)
+		material := api.Group("/material")
+		{
+			material.Use(authMiddleware)
+			material.GET("/", materialHandler.GetAll)
+		}
+
+		mdlHandler := handler.NewModelHandler(toolkit)
+		mdl := api.Group("/model")
+		{
+			mdl.Use(authMiddleware)
+			mdl.GET("/", mdlHandler.GetAll)
+		}
+
 	}
 }

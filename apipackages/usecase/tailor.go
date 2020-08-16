@@ -18,6 +18,8 @@ type (
 		TailorModelModel    model.ITailorModel
 		TailorMaterialModel model.ITailorMaterial
 		UserModel           model.IUser
+		MaterialModel       model.IMaterial
+		ModelModel          model.IModel
 	}
 
 	GetAllTailorParam struct {
@@ -62,7 +64,7 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 		return *new([]viewmodel.TailorVM), nil
 	}
 
-	tailorModelMap := map[int]entity.TailorModelEntity{}
+	tailorModelMap := map[int][]entity.TailorModelEntity{}
 	if p := param.ModelIDs; len(p) != 0 {
 		tailorModels, err := uc.TailorModelModel.GetAll(model.GetAllTailorModelParam{
 			ModelIDs: p,
@@ -72,7 +74,9 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 		}
 
 		for _, t := range tailorModels {
-			tailorModelMap[t.TailorID] = t
+			mdl := tailorModelMap[t.TailorID]
+			mdl = append(mdl, t)
+			tailorModelMap[t.TailorID] = mdl
 		}
 	}
 	for i, id := range ids {
@@ -85,7 +89,7 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 		return *new([]viewmodel.TailorVM), nil
 	}
 
-	tailorMaterialMap := map[int]entity.TailorMaterialEntity{}
+	tailorMaterialMap := map[int][]entity.TailorMaterialEntity{}
 	if p := param.MaterialIDs; len(p) != 0 {
 		tailorMaterials, err := uc.TailorMaterialModel.GetAll(model.GetAllTailorMaterialParam{
 			MaterialIDs: p,
@@ -95,7 +99,9 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 		}
 
 		for _, t := range tailorMaterials {
-			tailorMaterialMap[t.TailorID] = t
+			material := tailorMaterialMap[t.TailorID]
+			material = append(material, t)
+			tailorMaterialMap[t.TailorID] = material
 		}
 	}
 	for i, id := range ids {
@@ -110,10 +116,22 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 
 	if param.Price != 0 {
 		for i, id := range ids {
-			material := tailorMaterialMap[id]
-			mdl := tailorModelMap[id]
+			var ok bool
+			for _, mt := range tailorMaterialMap[id] {
+				if ok {
+					break
+				}
+				for _, md := range tailorModelMap[id] {
+					if ok {
+						break
+					}
 
-			if (material.Price + mdl.Price) > param.Price {
+					if (mt.Price + md.Price) <= param.Price {
+						ok = true
+					}
+				}
+			}
+			if !ok {
 				ids[i] = ids[len(ids)-1]
 				ids = ids[:len(ids)-1]
 			}
@@ -121,6 +139,30 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 	}
 	if len(ids) == 0 {
 		return *new([]viewmodel.TailorVM), nil
+	}
+
+	materials, err := uc.MaterialModel.GetAll(model.GetAllMaterialParam{
+		IDs: param.MaterialIDs,
+	})
+	if err != nil {
+		return *new([]viewmodel.TailorVM), err
+	}
+
+	materialMap := map[int]entity.MaterialEntity{}
+	for _, m := range materials {
+		materialMap[m.ID] = m
+	}
+
+	models, err := uc.ModelModel.GetAll(model.GetAllModelParam{
+		IDs: param.ModelIDs,
+	})
+	if err != nil {
+		return *new([]viewmodel.TailorVM), err
+	}
+
+	modelMap := map[int]entity.ModelEntity{}
+	for _, m := range models {
+		modelMap[m.ID] = m
 	}
 
 	tailors, err := uc.TailorModel.GetAll(model.GetAllTailorParam{
@@ -132,24 +174,33 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 	}
 
 	for _, t := range tailors {
-		temp := viewmodel.TailorVM{
-			ID:      t.ID,
-			UUID:    t.UUID,
-			Name:    t.Name.String,
-			Phone:   t.Phone.String,
-			Email:   t.Email,
-			Address: t.Address.String,
-		}
+		for _, md := range tailorModelMap[t.ID] {
+			for _, mt := range tailorMaterialMap[t.ID] {
+				temp := viewmodel.TailorVM{
+					ID:            t.ID,
+					MaterialID:    mt.MaterialID,
+					ModelID:       md.ModelID,
+					MaterialName:  materialMap[mt.MaterialID].Name,
+					MaterialColor: materialMap[mt.MaterialID].Color,
+					ModelName:     modelMap[md.ModelID].Name,
+					UUID:          t.UUID,
+					Name:          t.Name.String,
+					Phone:         t.Phone.String,
+					Email:         t.Email,
+					Address:       t.Address.String,
+				}
 
-		if v, e := tailorModelMap[t.ID]; e {
-			temp.Price += v.Price
-		}
+				if md.Price != 0 {
+					temp.Price += md.Price
+				}
 
-		if v, e := tailorModelMap[t.ID]; e {
-			temp.Price += v.Price
-		}
+				if mt.Price != 0 {
+					temp.Price += mt.Price
+				}
 
-		*res = append(*res, temp)
+				*res = append(*res, temp)
+			}
+		}
 	}
 
 	return *res, nil
