@@ -60,6 +60,10 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 				ids = append(ids, int(u.TailorID.Int32))
 			}
 		}
+
+		if len(ids) == 0 {
+			return *new([]viewmodel.TailorVM), nil
+		}
 	}
 
 	tailorModelMap := map[int][]entity.TailorModelEntity{}
@@ -82,6 +86,10 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 				ids[i] = ids[len(ids)-1]
 				ids = ids[:len(ids)-1]
 			}
+		}
+
+		if len(ids) == 0 {
+			return *new([]viewmodel.TailorVM), nil
 		}
 	}
 
@@ -106,6 +114,10 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 				ids = ids[:len(ids)-1]
 			}
 		}
+
+		if len(ids) == 0 {
+			return *new([]viewmodel.TailorVM), nil
+		}
 	}
 
 	if param.Price != 0 {
@@ -129,6 +141,10 @@ func (uc *Tailor) GetAll(param GetAllTailorParam) ([]viewmodel.TailorVM, error) 
 				ids[i] = ids[len(ids)-1]
 				ids = ids[:len(ids)-1]
 			}
+		}
+
+		if len(ids) == 0 {
+			return *new([]viewmodel.TailorVM), nil
 		}
 	}
 
