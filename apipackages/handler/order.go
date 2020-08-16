@@ -76,7 +76,7 @@ func (h *Order) GetAll(c *gin.Context) {
 		ids = append(ids, id)
 	}
 
-	statusA := c.QueryArray("user_id")
+	statusA := c.QueryArray("status")
 	status := []int{}
 	for _, i := range statusA {
 		v, e := constants.OrderStatusAtoI[i]
@@ -152,18 +152,18 @@ func (h *Order) InsertOne(c *gin.Context) {
 	}
 
 	res, err := h.OrderUC.InsertOne(usecase.InsertOneOrderParam{
-		UserID: req.UserID,
-		TailorID: req.TailorID,
-		ModelID: req.ModelID,
+		UserID:     req.UserID,
+		TailorID:   req.TailorID,
+		ModelID:    req.ModelID,
 		MaterialID: req.MaterialID,
-		XSQty: req.XSQty,
-		SQty: req.SQty,
-		MQty: req.MQty,
-		LQty: req.LQty,
-		XLQty: req.XLQty,
-		XXLQty: req.XXLQty,
-		LLLQty: req.LLLQty,
-		Price: req.Price,
+		XSQty:      req.XSQty,
+		SQty:       req.SQty,
+		MQty:       req.MQty,
+		LQty:       req.LQty,
+		XLQty:      req.XLQty,
+		XXLQty:     req.XXLQty,
+		LLLQty:     req.LLLQty,
+		Price:      req.Price,
 	})
 	if err != nil {
 		switch err {
@@ -197,7 +197,7 @@ func (h *Order) UpdateStatusOne(c *gin.Context) {
 	}
 
 	res, err := h.OrderUC.UpdateStatusOne(usecase.UpdateStatusOneOrderParam{
-		ID: req.ID,
+		ID:     req.ID,
 		Status: constants.OrderStatusAtoI[req.Status],
 	})
 	if err != nil {
